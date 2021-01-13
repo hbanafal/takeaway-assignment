@@ -1,6 +1,7 @@
 package com.takeaway.api.automation.steps;
 
 import org.assertj.core.api.SoftAssertions;
+import org.junit.Assert;
 
 import com.takeaway.api.automation.actionsImpl.FarmActionsImpl;
 import com.takeaway.api.automation.models.Response.ErrorResponse;
@@ -15,11 +16,10 @@ public class FarmActionsStepDefinition extends TestStep {
     Response response;
     ErrorResponse errorResponse;
     PostFarmActionResponse postFarmActionResponse;
-    FarmActionsImpl farmActions;
+    FarmActionsImpl farmActions = new FarmActionsImpl();
 
     @Step
     public void userIsUnlockingTheBarn() {
-        farmActions = new FarmActionsImpl();
         response = farmActions.unlockBarn();
         postFarmActionResponse = response.getBody().as(PostFarmActionResponse.class);
     }
@@ -27,20 +27,12 @@ public class FarmActionsStepDefinition extends TestStep {
     @Step
     public void verifyUserSuccessfullyUnlockedTheBarn() {
 
-        SoftAssertions softAssertion = new SoftAssertions();
-        softAssertion.assertThat(postFarmActionResponse.getAction()).as("Farm action is not correct")
-                .isEqualTo("barn-unlock");
-        softAssertion.assertThat(postFarmActionResponse.getSuccess()).as("Success is not correct").isTrue();
-        softAssertion.assertThat(postFarmActionResponse.getMessage()).as("Message is not correct")
-                .isEqualTo("You just unlocked your barn! Watch out for strangers!");
-        softAssertion.assertThat(postFarmActionResponse.getData()).as("Data is not null").isEqualTo(0);
-        softAssertion.assertAll();
+        verifyRespone("barn-unlock", "You just unlocked your barn! Watch out for strangers!", 0);
 
     }
 
     @Step
     public void userIsPuttingToiletSeatDown() {
-        farmActions = new FarmActionsImpl();
         response = farmActions.putToiletSeatDown();
         postFarmActionResponse = response.getBody().as(PostFarmActionResponse.class);
     }
@@ -48,20 +40,12 @@ public class FarmActionsStepDefinition extends TestStep {
     @Step
     public void verifyUserSuccessfullyPutTpiletSeatDown() {
 
-        SoftAssertions softAssertion = new SoftAssertions();
-        softAssertion.assertThat(postFarmActionResponse.getAction()).as("Farm action is not correct")
-                .isEqualTo("toiletseat-down");
-        softAssertion.assertThat(postFarmActionResponse.getSuccess()).as("Success is not correct").isTrue();
-        softAssertion.assertThat(postFarmActionResponse.getMessage()).as("Message is not correct")
-                .isEqualTo("You just put the toilet seat down. You're a wonderful roommate!");
-        softAssertion.assertThat(postFarmActionResponse.getData()).as("Data is not null").isEqualTo(0);
-        softAssertion.assertAll();
+        verifyRespone("toiletseat-down", "You just put the toilet seat down. You're a wonderful roommate!", 0);
 
     }
 
     @Step
     public void userIsFeedingChickens() {
-        farmActions = new FarmActionsImpl();
         response = farmActions.feedChickens();
         postFarmActionResponse = response.getBody().as(PostFarmActionResponse.class);
     }
@@ -69,58 +53,47 @@ public class FarmActionsStepDefinition extends TestStep {
     @Step
     public void verifyUserSuccessfullyFeededChickens() {
 
-        SoftAssertions softAssertion = new SoftAssertions();
-        softAssertion.assertThat(postFarmActionResponse.getAction()).as("Farm action is not correct")
-                .isEqualTo("chickens-feed");
-        softAssertion.assertThat(postFarmActionResponse.getSuccess()).as("Success is not correct").isTrue();
-        softAssertion.assertThat(postFarmActionResponse.getMessage()).as("Message is not correct")
-                .isEqualTo("Your chickens are now full and happy");
-        softAssertion.assertThat(postFarmActionResponse.getData()).as("Data is not null").isEqualTo(0);
-        softAssertion.assertAll();
+        verifyRespone("chickens-feed", "Your chickens are now full and happy", 0);
 
     }
 
     @Step
     public void userIsCollectingEggsFromChickens() {
-        farmActions = new FarmActionsImpl();
         response = farmActions.collectEggsFromChicken();
         postFarmActionResponse = response.getBody().as(PostFarmActionResponse.class);
     }
 
     @Step
     public void verifyUserSuccessfullyCollectedEggs() {
-
-        SoftAssertions softAssertion = new SoftAssertions();
         int noOfEggs = postFarmActionResponse.getData();
-        softAssertion.assertThat(postFarmActionResponse.getAction()).as("Farm action is not correct")
-                .isEqualTo("eggs-collect");
-        softAssertion.assertThat(postFarmActionResponse.getSuccess()).as("Success is not correct").isTrue();
-        softAssertion.assertThat(postFarmActionResponse.getMessage()).as("Message is not correct")
-                .isEqualTo("Hey look at that, " + noOfEggs + " eggs have been collected!");
-        softAssertion.assertThat(postFarmActionResponse.getData()).as("Data is not null").isGreaterThan(0);
-        softAssertion.assertAll();
+        Assert.assertTrue("No of eggs collected are not greater than zero", noOfEggs > 0);
+
+        verifyRespone("eggs-collect", "Hey look at that, " + noOfEggs + " eggs have been collected!", noOfEggs);
 
     }
 
     @Step
     public void userIsCountingEggsCollected() {
-        farmActions = new FarmActionsImpl();
         response = farmActions.getNumberOfEggsCollected();
         postFarmActionResponse = response.getBody().as(PostFarmActionResponse.class);
     }
 
     @Step
     public void verifyUserSuccessfullyCountedEggs() {
-
-        SoftAssertions softAssertion = new SoftAssertions();
         int noOfEggs = postFarmActionResponse.getData();
-        softAssertion.assertThat(postFarmActionResponse.getAction()).as("Farm action is not correct")
-                .isEqualTo("eggs-count");
-        softAssertion.assertThat(postFarmActionResponse.getSuccess()).as("Success is not correct").isTrue();
-        softAssertion.assertThat(postFarmActionResponse.getMessage()).as("Message is not correct")
-                .isEqualTo("You have collected a total of " + noOfEggs + " eggs today");
-        softAssertion.assertThat(postFarmActionResponse.getData()).as("Data is not null").isGreaterThan(0);
-        softAssertion.assertAll();
+        Assert.assertTrue("No of eggs collected are not greater than zero", noOfEggs > 0);
 
+        verifyRespone("eggs-count", "You have collected a total of " + noOfEggs + " eggs today", noOfEggs);
+    }
+
+    private void verifyRespone(String farmAction, String message, int data) {
+        SoftAssertions softAssertion = new SoftAssertions();
+        softAssertion.assertThat(postFarmActionResponse.getAction()).as("Farm action is not correct")
+                .isEqualTo(farmAction);
+        softAssertion.assertThat(postFarmActionResponse.getSuccess()).as("Farm action is not successful.").isTrue();
+        softAssertion.assertThat(postFarmActionResponse.getMessage()).as("Farm action Message is not correct")
+                .isEqualTo(message);
+        softAssertion.assertThat(postFarmActionResponse.getData()).as("Data is not correct").isEqualTo(data);
+        softAssertion.assertAll();
     }
 }
